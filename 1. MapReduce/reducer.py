@@ -9,7 +9,7 @@ lows = []
 highs = []
 volumes = []
 
-stocks = {"AAPL": "Apple Inc.", "GOOGL": "Alphabet Inc.", "MSFT": "Microsoft Corporation"}  # Define the "stocks" dictionary
+stocks = {"AAPL": "Apple Inc.", "GOOGL": "Alphabet Inc.", "MSFT": "Microsoft Corporation"}  # Definisci il dizionario "stocks"
 
 def calculate_and_output_stats(ticker, year, closes, lows, highs, volumes):
     first_close = closes[0]
