@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 
 # Dizionario per raccogliere i dati per ciascuna azione e anno
-action_data = defaultdict(lambda: {'prices': [], 'first_close': None, 'last_close': None})
+action_data = defaultdict(lambda: {'company_name': None, 'prices': [], 'first_close': None, 'last_close': None})
 
 # Processa l'input dallo standard input
 for line in sys.stdin:
@@ -17,6 +17,9 @@ for line in sys.stdin:
     high = float(fields[6])
     volume = int(fields[7])
 
+    if action_data[(ticker, year)]['company_name'] is None:
+        action_data[(ticker, year)]['company_name'] = company_name
+    
     action_data[(ticker, year)]['prices'].append((low, high, volume))
     
     if month <= 6:
@@ -38,5 +41,6 @@ for (ticker, year), data in action_data.items():
     min_price = min(x[0] for x in data['prices'])
     max_price = max(x[1] for x in data['prices'])
     avg_volume = round(sum(x[2] for x in data['prices']) / len(data['prices']), 2)
-
+    
+    company_name = data['company_name']
     print(f"{ticker}\t{company_name}\t{year}\t{pct_change}\t{min_price}\t{max_price}\t{avg_volume}")
