@@ -1,50 +1,42 @@
 #!/usr/bin/env python3
 import sys
-import csv
-import statistics
 from collections import defaultdict
-from datetime import datetime
 
-# Funzione per calcolare e stampare le statistiche
-def calculate_and_output_stats(ticker, year, data):
-    data.sort(key=lambda x: x[0])  # Ordina per data
-    first_close = data[0][1]
-    last_close = data[-1][1]
-    pct_change = round((last_close - first_close) / first_close * 100, 2)
-    closes = [x[1] for x in data]
-    lows = [x[2] for x in data]
-    highs = [x[3] for x in data]
-    volumes = [x[4] for x in data]
-    min_price = min(lows)
-    max_price = max(highs)
-    avg_volume = round(statistics.mean(volumes), 2)
-    print(f"{ticker}\t{company_name}\t{year}\t{pct_change}\t{min_price}\t{max_price}\t{avg_volume}")
+# Dizionario per raccogliere i dati per ciascuna azione e anno
+action_data = defaultdict(lambda: {'prices': [], 'first_close': None, 'last_close': None})
 
-# Variabili per tracciare l'attuale ticker e anno
-current_ticker = None
-current_year = None
-year_data = defaultdict(list)
-
-# Processa l'input
+# Processa l'input dallo standard input
 for line in sys.stdin:
     fields = line.strip().split('\t')
     ticker = fields[0]
-    company_name=fields[1]
+    company_name = fields[1]
     year = int(fields[2])
-    date_str = fields[3]
+    month = int(fields[3])
     close = float(fields[4])
     low = float(fields[5])
     high = float(fields[6])
     volume = int(fields[7])
 
-    if current_ticker != ticker or current_year != year:
-        if current_ticker and current_year:
-            calculate_and_output_stats(current_ticker, current_year, year_data[(current_ticker, current_year)])
-        current_ticker = ticker
-        current_year = year
+    action_data[(ticker, year)]['prices'].append((low, high, volume))
+    
+    if month <= 6:
+        if action_data[(ticker, year)]['first_close'] is None:
+            action_data[(ticker, year)]['first_close'] = close
+    else:
+        action_data[(ticker, year)]['last_close'] = close
 
-    year_data[(ticker, year)].append((datetime.strptime(date_str, '%Y-%m-%d'), close, low, high, volume))
+# Calcola le statistiche per ciascuna azione e anno
+for (ticker, year), data in action_data.items():
+    first_close = data['first_close']
+    last_close = data['last_close']
+    
+    if first_close is not None and last_close is not None:
+        pct_change = round((last_close - first_close) / first_close * 100, 2)
+    else:
+        pct_change = None
+    
+    min_price = min(x[0] for x in data['prices'])
+    max_price = max(x[1] for x in data['prices'])
+    avg_volume = round(sum(x[2] for x in data['prices']) / len(data['prices']), 2)
 
-# Elabora l'ultimo ticker/anno
-if current_ticker and current_year:
-    calculate_and_output_stats(current_ticker, current_year, year_data[(current_ticker, current_year)])
+    print(f"{ticker}\t{company_name}\t{year}\t{pct_change}\t{min_price}\t{max_price}\t{avg_volume}")

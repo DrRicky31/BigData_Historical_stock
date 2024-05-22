@@ -27,10 +27,9 @@ for row in reader:
         volume = int(row[6])
         company_name = stocks.get(ticker, "Unknown")
         date = datetime.strptime(date_str, '%Y-%m-%d')
+        month= date.month
         year = date.year
-        if(date.month>='02' and date.month<'12'):
-            continue
-        print(f"{ticker}\t{company_name}\t{year}\t{date_str}\t{close}\t{low}\t{high}\t{volume}")
+        print(f"{ticker}\t{company_name}\t{year}\t{month}\t{close}\t{low}\t{high}\t{volume}")
     except Exception as e:
         # Ignora le righe non valide
         continue
