@@ -7,14 +7,13 @@ from datetime import datetime
 action_data = defaultdict(lambda: {'company_name': None, 'prices': [], 'closes': {}, 'first_close': None, 'last_close': None})
 date_data = defaultdict(list)  # Dizionario per raccogliere le date per ciascun anno
 
-
 # Processa l'input dallo standard input
 for line in sys.stdin:
     fields = line.strip().split('\t')
     ticker = fields[0]
     company_name = fields[1]
     year = int(fields[2])
-    date = fields[3]
+    date = fields[3]  # Assumendo che la data sia il quarto campo (indice 3)
     close = float(fields[4])
     low = float(fields[5])
     high = float(fields[6])
@@ -27,24 +26,18 @@ for line in sys.stdin:
         action_data[(ticker, year)]['company_name'] = company_name
     
     action_data[(ticker, year)]['prices'].append((low, high, volume))
-    '''
-    if month <= 6:
-        if action_data[(ticker, year)]['first_close'] is None:
-            action_data[(ticker, year)]['first_close'] = close
-    else:
-        action_data[(ticker, year)]['last_close'] = close
-    '''
-        
+    action_data[(ticker, year)]['closes'][date] = close  # Memorizza il valore di chiusura per la data
+
 # Calcola le date minime e massime per ogni anno
 first_dates = {year: min(dates) for year, dates in date_data.items()}
 last_dates = {year: max(dates) for year, dates in date_data.items()}
-
 
 # Calcola le statistiche per ciascuna azione e anno
 for (ticker, year), data in action_data.items():
     # Trova le date di inizio e fine per l'anno corrente
     first_date = first_dates[year]
     last_date = last_dates[year]
+    
     # Recupera i valori di chiusura per le date di inizio e fine
     first_close = data['closes'].get(first_date)
     last_close = data['closes'].get(last_date)
