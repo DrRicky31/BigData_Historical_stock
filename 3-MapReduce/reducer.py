@@ -48,6 +48,16 @@ for ticker, yearly_changes in pct_changes.items():
         if trend1 == trend2 == trend3:  # Se il trend è lo stesso per tre anni consecutivi
             trend_sequence.append((y1, y2, y3, trend1))
     
+    """
+    # Versione con solo due anni consecutivi
+    for i in range(len(sorted_years) - 2):  # Guardiamo almeno due anni consecutivi
+        y1, y2 = sorted_years[i], sorted_years[i+1]
+        trend1, trend2 = yearly_changes[y1], yearly_changes[y2]
+        
+        if trend1 == trend2:  # Se il trend è lo stesso per due anni consecutivi
+            trend_sequence.append((y1, y2, trend1))  
+    """
+
     # Aggiungi al gruppo se abbiamo una sequenza valida
     for sequence in trend_sequence:
         trend_groups[sequence].append(action_data[(ticker, sequence[0])]['company_name'])
