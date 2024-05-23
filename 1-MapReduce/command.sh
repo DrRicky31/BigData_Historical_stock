@@ -1,4 +1,5 @@
 #!/bin/bash
+hdfs dfs -rm -r /user/hadoop/output
 hadoop jar $HADOOP_HOME/streaming/hadoop-streaming-3.4.0.jar \
     -input /user/hadoop/historical_stock_prices_pulito.csv \
     -output /user/hadoop/output \
