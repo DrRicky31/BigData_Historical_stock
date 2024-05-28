@@ -13,7 +13,7 @@ for line in sys.stdin:
     ticker = fields[0]
     company_name = fields[1]
     year = int(fields[2])
-    date = (fields[3])
+    date = fields[3]
     close = float(fields[4])
 
     if action_data[(ticker, year)]['company_name'] is None:
@@ -39,9 +39,11 @@ for (ticker, year), data in action_data.items():
     last_close = data['closes'].get(last_date)
     
     if first_close is not None and last_close is not None:
-        pct_change = round((last_close - first_close) / first_close * 100, 2)
+        pct_change = round((last_close - first_close) / first_close * 100)
     else:
         pct_change = None
+    pct_changes[ticker][year] = pct_change
+
 
 # Trova gruppi di aziende con lo stesso trend per almeno tre anni consecutivi
 trend_groups = defaultdict(list)  # trend_groups[(year1, year2, year3, ...)]['trend'] = [company1, company2, ...]
