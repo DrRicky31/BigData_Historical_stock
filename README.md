@@ -4,5 +4,5 @@
 |              | Task 1 | Task2 |
 | :----------- | :----: | :---: |
 | MapReduce    |   ✓    |   x   |
-| SparkSQL     |   x    |   x   |
-| SparkCore    |   ✓    |   x   |
+| SparkCore    |   x    |   x   |
+| SparkSQL     |   ✓    |   x   |
