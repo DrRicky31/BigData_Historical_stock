@@ -24,9 +24,8 @@ for row in reader:
         date_str = row[7]
         company_name = stocks.get(ticker, "Unknown")
         date = datetime.strptime(date_str, '%Y-%m-%d')
-        month= date.month
         year = date.year
-        print(f"{ticker}\t{company_name}\t{year}\t{month}\t{close}")
+        print(f"{ticker}\t{company_name}\t{year}\t{date}\t{close}")
     except Exception as e:
         # Ignora le righe non valide
         continue
