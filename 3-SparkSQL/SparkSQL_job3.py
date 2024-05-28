@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, min as spark_min, max as spark_max, avg, first, last, round as spark_round, lag, lead
+from pyspark.sql.functions import col, first, last, round as spark_round, lag, lead, concat, lit, collect_list, array_join
 from pyspark.sql.window import Window
 
 # Inizializza una sessione Spark
@@ -21,6 +21,7 @@ aggregated_df = joined_df.groupBy("ticker", "name", "year") \
         last("close").alias("last_close")
     ) \
     .withColumn("pct_change", spark_round((col("last_close") - col("first_close")) / col("first_close") * 100, 0)) \
+    .withColumn("pct_change", concat(col("pct_change").cast("int"), lit("%"))) \
     .select("ticker", "name", "year", "pct_change")
 
 # Definisci la finestra di partizione per ticker e ordina per anno
@@ -34,10 +35,17 @@ consecutive_df = aggregated_df \
     .select("year", lead("year", 1).over(window_spec).alias("year2"), lead("year", 2).over(window_spec).alias("year3"), "pct_change", "name")
 
 # Filtra per avere solo anni validi
-final_df = consecutive_df.filter(col("year3").isNotNull())
+filtered_df = consecutive_df.filter(col("year3").isNotNull())
+
+# Raggruppa le aziende che hanno la stessa percentuale per tre anni consecutivi
+grouped_df = filtered_df.groupBy("year", "year2", "year3", "pct_change") \
+    .agg(array_join(collect_list("name"), ", ").alias("company_names"))
+
+# Ordina per anno e percentuale di cambiamento
+final_df = grouped_df.orderBy("year", "pct_change")
 
 # Mostra il risultato
-final_df.show()
+final_df.show(truncate=False)
 
 # Salva il risultato su un file CSV in una singola partizione
 final_df.coalesce(1).write.csv('/user/hadoop3/SQL3_result', header=True, mode='overwrite')
