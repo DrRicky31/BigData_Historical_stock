@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import year, col, min as spark_min, max as spark_max, avg, first, last, round as spark_round
-from pyspark.sql.window import Window
+from pyspark.sql.functions import year
 
 # Inizializza una sessione Spark
 spark = SparkSession.builder.appName("Stock Analysis").getOrCreate()
@@ -22,36 +21,33 @@ joined_df = historical_prices_df.join(historical_stocks_df, historical_prices_df
         historical_prices_df.volume
     )
 
-# Calcola le aggregazioni richieste per ciascun ticker e anno
-aggregated_df = joined_df \
-    .groupBy("ticker", "company_name", "year") \
-    .agg(
-        spark_min("low").alias("min_price"),
-        spark_max("high").alias("max_price"),
-        spark_round(avg("volume"), 2).alias("avg_volume"),
-        first("close").alias("first_close"),
-        last("close").alias("last_close")
-    )
+# Converti il DataFrame in RDD per l'aggregazione
+joined_rdd = joined_df.rdd.map(lambda row: (
+    (row['ticker'], row['company_name'], row['year']),
+    (row['date'], row['close'], row['low'], row['high'], row['volume'])
+))
 
-# Calcola la variazione percentuale utilizzando le funzioni di finestra
-window_spec = Window.partitionBy("ticker", "year").orderBy("date")
+# Funzione per aggregare i dati
+def aggregate_data(values):
+    sorted_values = sorted(values, key=lambda x: x[0])
+    min_price = min(v[2] for v in values)
+    max_price = max(v[3] for v in values)
+    avg_volume = round(sum(v[4] for v in values) / len(values), 2)
+    first_close = sorted_values[0][1]
+    last_close = sorted_values[-1][1]
+    pct_change = round((last_close - first_close) / first_close * 100, 2)
+    return (min_price, max_price, avg_volume, first_close, last_close, pct_change)
 
-result_df = joined_df \
-    .withColumn("first_close", first("close").over(window_spec)) \
-    .withColumn("last_close", last("close").over(window_spec)) \
-    .groupBy("ticker", "company_name", "year") \
-    .agg(
-        spark_min("low").alias("min_price"),
-        spark_max("high").alias("max_price"),
-        spark_round(avg("volume"), 2).alias("avg_volume"),
-        first("first_close").alias("first_close"),
-        last("last_close").alias("last_close")
-    ) \
-    .withColumn("pct_change", spark_round((col("last_close") - col("first_close")) / col("first_close") * 100, 2)) \
-    .select("ticker", "company_name", "year", "pct_change", "min_price", "max_price", "avg_volume")
+# Raggruppa per ticker, company_name e year e applica l'aggregazione
+aggregated_rdd = joined_rdd.groupByKey().mapValues(aggregate_data)
+
+# Converti l'RDD aggregato di nuovo in DataFrame
+aggregated_df = aggregated_rdd.map(lambda x: (
+    x[0][0], x[0][1], x[0][2], x[1][5], x[1][0], x[1][1], x[1][2]
+)).toDF(["ticker", "company_name", "year", "pct_change", "min_price", "max_price", "avg_volume"])
 
 # Riduci il numero di partizioni a una
-single_partition_df = result_df.coalesce(1)
+single_partition_df = aggregated_df.coalesce(1)
 
 # Mostra il risultato
 single_partition_df.show()
