@@ -4,11 +4,7 @@ from pyspark.sql.functions import year, concat_ws, col
 # Initialize a Spark session
 spark = SparkSession.builder.appName("Stock Analysis").getOrCreate()
 
-<<<<<<< HEAD
 # Load the data
-=======
-# Carica i dati
->>>>>>> refs/remotes/origin/main
 historical_stocks_df = spark.read.csv('/user/hadoop/historical_stock_pulito.csv', header=True, inferSchema=True)
 historical_prices_df = spark.read.csv('/user/hadoop/historical_stock_prices_pulito.csv', header=True, inferSchema=True)
 
