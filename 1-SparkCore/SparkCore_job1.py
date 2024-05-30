@@ -53,4 +53,4 @@ single_partition_df = aggregated_df.coalesce(1)
 single_partition_df.show()
 
 # Salva il risultato su un file CSV in una singola partizione
-single_partition_df.write.csv('/user/hadoop/SparkCore_result', header=True, mode='overwrite')
+single_partition_df.write.csv('/user/hadoop/SparkCore1_result', header=True, mode='overwrite')
