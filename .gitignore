@@ -2,3 +2,6 @@ historical_stock_prices_pulito.csv
 historical_stock_prices.csv
 historical_stocks.csv
 historical_stock_pulito.csv
+
+derby.log
+metastore_db

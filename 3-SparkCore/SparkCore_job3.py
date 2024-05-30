@@ -5,8 +5,8 @@ from pyspark.sql.functions import year, concat_ws, col
 spark = SparkSession.builder.appName("Stock Analysis").getOrCreate()
 
 # Carica i dati
-historical_stocks_df = spark.read.csv('/user/hadoop3/historical_stock_pulito.csv', header=True, inferSchema=True)
-historical_prices_df = spark.read.csv('/user/hadoop3/historical_stock_prices_pulito.csv', header=True, inferSchema=True)
+historical_stocks_df = spark.read.csv('/user/hadoop/historical_stock_pulito.csv', header=True, inferSchema=True)
+historical_prices_df = spark.read.csv('/user/hadoop/historical_stock_prices_pulito.csv', header=True, inferSchema=True)
 
 # Unisci i dati dei prezzi con i nomi delle aziende
 joined_df = historical_prices_df.join(historical_stocks_df, historical_prices_df.ticker == historical_stocks_df.ticker, "left") \
