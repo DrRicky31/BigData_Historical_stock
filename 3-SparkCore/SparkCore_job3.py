@@ -86,4 +86,4 @@ trend_df = trend_df.withColumn("trend", concat_ws(", ",
 trend_df.show(truncate=False)
 
 # Salva il risultato su un file CSV in una singola partizione
-trend_df.coalesce(1).write.csv('/user/hadoop3/output', header=True, mode='overwrite')
+trend_df.coalesce(1).write.csv('/user/hadoop3/SparkCore3_result', header=True, mode='overwrite')
